@@ -1,5 +1,6 @@
 luafft = require "luafft"
-local soundData = love.sound.newSoundData("atb.mp3")
+local songName = "nadecat.mp3"
+local soundData = love.sound.newSoundData(songName)
 local updateSpectrum = false
 
 function devide(list, factor)
@@ -12,13 +13,15 @@ local audioSize = soundData:getSampleCount()
 local frequency = soundData:getSampleRate()
 local length = size / frequency
 
-local audioSource = love.audio.newSource("atb.mp3")
+love.graphics.setBackgroundColor(255,255,255)
+
+local audioSource = love.audio.newSource(songName)
 audioSource:play()
 
 local windowWidth = love.graphics.getWidth()
 local windowHeight = love.graphics.getHeight()
 local spectrum, temp
-local maxTime = .02
+local maxTime = .013
 local timer = maxTime
 function love.update(dt)
   local audioPos = audioSource:tell("samples")
@@ -43,13 +46,24 @@ end
 
 function love.draw()
     if not spectrum then return end
-    local barWidth = 14
+    local barWidth = 12
     for i = 1, #spectrum / barWidth do
-      love.graphics.rectangle("fill", i * (barWidth-1), windowHeight,
-        (barWidth-1), -1 * (spectrum[i]:abs() * 0.3)) -- bars
-      love.graphics.print("@ " .. math.floor((i) / length) .. "Hz "
-        .. math.floor(spectrum[i]:abs() * 0.3), windowWidth - 90, (12 * i)) -- frequencies
-      love.graphics.print(temp, 0, 0) -- current position
+
+      local sensitiviy = .35
+      local barHeight = (spectrum[i]:abs() * sensitiviy)
+      local n = barHeight
+      if n > 255 then
+        n = 255
+      end
+      love.graphics.setColor(n, 0, 150)
+
+      love.graphics.rectangle("fill", (i-1) * (barWidth-1), windowHeight / 2 - barHeight / 2,
+        (barWidth-1), (barHeight)) -- bars
+
+      love.graphics.setColor(255,255,255)
+      -- love.graphics.print("@ " .. math.floor((i) / length) .. "Hz "
+        -- .. math.floor(barHeight), windowWidth - 90, (12 * i)) -- frequencies
+      -- love.graphics.print(temp, 0, 0) -- current position
     end
 end
 
